@@ -11,6 +11,8 @@
 #include <string>
 #include <iostream>
 
+#include <fstream>
+
 using namespace std;
 
 /****************************************************/
@@ -28,7 +30,10 @@ void render_screen(void);
 /****************************************************/
 // global variables:
 /****************************************************/
-char** map;// pointer pointer equals to array of arrays = 2-dimensional array of chars
+
+char** map;
+
+// pointer pointer equals to array of arrays = 2-dimensional array of chars
 // above is virtually identical, as a variable, compared to for example:
 //	    char map[MAXSTR][MAXLEN] = {{0}}; // declare a static 2-dim array of chars, initialize to zero
 // However pointer to pointer has not allocated memory yet attached to it, this is done dynamically when actual size known
@@ -56,7 +61,7 @@ int main(void)
 	start_splash_screen();
 	startup_routines();
 	char input;
-
+	load_level("null");
 	// IMPORTANT NOTE: do not exit program without cleanup: freeing allocated dynamic memory etc
 	while (true) // infinite loop, should end with "break" in case of game over or user quitting etc.
 	{
@@ -80,11 +85,57 @@ int main(void)
  * **************************************************************/
 void load_level(string filepath)
 {
+	filepath = "C:\\Users\\mikko\\Documents\\SchoolProject\\Olio Koodaus\\Mikko_Anttila_CGame_Git\\Mikko_Anttila_CGame\\Mikko_Anttila_CGame\\Levels\\level_0.map";
+	ifstream mapFile(filepath);
+	if (!mapFile)
+	{
+		cout << "The file doesn't exist" << endl;
+	}
+	else {
+		cout << "Exists" << endl;
+
+		string firstLine;
+		getline(mapFile, firstLine);
+
+		int characterCount = firstLine.length();
+
+		cout << "Number of characters in the first line: " << characterCount << endl;
+		
+
+		map = new char* [characterCount];
+		for (int i = 0; i < characterCount; ++i) {
+			map[i] = new char[characterCount];
+		}
+
+		mapFile.seekg(0);
+		for (int i = 0; i < characterCount; ++i) {
+			for (int j = 0; j < characterCount; ++j) {
+				mapFile >> map[i][j];
+			}
+		}
+
+		//Print Map
+
+		for (int y = 0; y < characterCount; y++)
+		{
+			for (int x = 0; x < characterCount; x++)
+			{
+				cout << map[x][y];
+			}
+			cout << endl;
+		}
+
+		mapFile.close();
+	}
+
+
+
 	// steps in short:
 	// 1) locate, check and open file, if failure, return value indicating error (and check on the calling side)
 	// 2) read first row, count number of characters. Assuming all maps are rectangular, use this information
 	//    to memory allocation of global "map" (char ** map) pointer.
 	//    Assuming first row contains N characters, then you need to allocate 2D table/array of dimensions N x N
+	// 
 	//    -> in practice first allocate to "map" an N-long array of (char *) pointers
 	//        and then within a loop allocate an N-long array of chars to each of the previous entries
 	//           -> as a result "map" is a pointer to pointer corresponding a 2D-array sized [N][N]
